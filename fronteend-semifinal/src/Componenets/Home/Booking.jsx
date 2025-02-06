@@ -45,32 +45,32 @@ const Booking = ({ user_skills, provider, onClose }) => {
   };
 
   return (
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 backdrop-blur-md">
+    <div className="absolute w-1/2 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 backdrop-blur-md">
       <form
         onSubmit={handleSubmit}
-        className="bg-gray-900 p-6 rounded-lg shadow-md w-96 relative" // Added relative for positioning
+        className="bg-gray-900 p-6 rounded-lg shadow-md w-full relative" // Added relative for positioning
       >
         <button
           type="button"
           onClick={onClose} // Close form on click
-          className="absolute top-2 right-2 text-gray-400 hover:text-white" // Close button styling
+          className="absolute top-2 text-5xl right-5 text-gray-400 hover:text-white" // Close button styling
         >
           &times; {/* Close icon */}
         </button>
-        <h2 className="text-white text-2xl mb-4">Create Booking</h2>
+        <h2 className="text-white text-3xl mb-4">Create Booking</h2>
         {error && <p className="text-red-500">{error}</p>}{" "}
         {/* Display error message */}
         <div className="mb-4">
-          <label className="text-gray-300">Type:</label>
-          <p className="mt-1 block w-full p-2 bg-gray-700 text-white rounded-md">
+          <label className="text-gray-300 text-lg">Type:</label>
+          <p className="mt-1 block w-full text-xl p-2 bg-gray-700 text-white rounded-md">
             Requesting
           </p>
         </div>
         <div className="mb-4">
-          <label className="text-gray-300">Skills to Learn:</label>
+          <label className="text-gray-300 text-lg">Skills to Learn:</label>
           <div className="flex flex-col mt-1">
             {skills.map((skill) => (
-              <label key={skill} className="flex items-center">
+              <label key={skill} className="flex items-center text-xl">
                 <input
                   type="checkbox"
                   value={skill}
@@ -85,7 +85,7 @@ const Booking = ({ user_skills, provider, onClose }) => {
         <div className="mb-4"></div>
         <button
           type="submit"
-          className="w-full bg-blue-500 p-2 rounded-md text-white"
+          className="w-full bg-blue-500 text-xl p-2 rounded-md text-white"
         >
           Create Booking
         </button>
