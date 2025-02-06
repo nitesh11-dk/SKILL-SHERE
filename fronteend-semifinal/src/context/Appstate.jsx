@@ -314,8 +314,9 @@ const Appstate = (props) => {
           withCredentials: true,
         });
 
-        console.log("Response from adding skills:", response.data); // Added console log
+        // console.log("Response from adding skills:", response.data); // Added console log
         if (response.data.success) {
+          return response.data;
           toast.success(response.data.message);
         } else {
           toast.error(response.data.message);
@@ -327,6 +328,65 @@ const Appstate = (props) => {
     }
   };
 
+  const setBookingStatus = async (formData) => {
+    try {
+      if (localStorage.getItem("token")) {
+        const token = localStorage.getItem("token");
+        const response = await axios.post(
+          `${BASE_URL}/bookings/respond`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Auth: token,
+            },
+            withCredentials: true,
+          }
+        );
+
+        // console.log("Response from adding skills:", response.data); // Added console log
+        if (response.data.success) {
+          toast.success(response.data.message);
+          return response.data;
+        } else {
+          toast.error(response.data.message);
+        }
+      }
+    } catch (error) {
+      console.error("Error adding skills: ", error);
+      toast.error("An error occurre feteching the requeste bookings.");
+    }
+  };
+
+  // const scheduleBookingDate = async (formData) => {
+  //   try {
+  //     if (localStorage.getItem("token")) {
+  //       const token = localStorage.getItem("token");
+  //       const response = await axios.post(
+  //         `${BASE_URL}/bookings/scheduleBookingDate`,
+  //         formData,
+  //         {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Auth: token,
+  //           },
+  //           withCredentials: true,
+  //         }
+  //       );
+
+  //       // console.log("Response from adding skills:", response.data); // Added console log
+  //       if (response.data.success) {
+  //         toast.success(response.data.message);
+  //         return response.data;
+  //       } else {
+  //         toast.error(response.data.message);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error adding skills: ", error);
+  //     toast.error("An error occurre feteching the requeste bookings.");
+  //   }
+  // };
   return (
     <AppContext.Provider
       value={{
@@ -345,6 +405,8 @@ const Appstate = (props) => {
         reqestedBookings,
         offeringBookings,
         logoutUser,
+        setBookingStatus,
+        scheduleBookingDate,
       }}
     >
       {props.children}

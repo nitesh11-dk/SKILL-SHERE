@@ -33,7 +33,7 @@ export const createBooking = async (req, res) => {
 export const getOfferingBookings = async (req, res) => {
     try {
         const userId = req.user._id;
-        const bookings = await Booking.find({ provider: userId });
+        const bookings = await Booking.find({ provider: userId }).populate('provider requester');
 
         if (!bookings.length) {
             return res.status(201).json({ message: "No offering bookings found for this user" });
@@ -48,10 +48,10 @@ export const getOfferingBookings = async (req, res) => {
 export const getRequesterBookings = async (req, res) => {
     try {
         const userId = req.user._id;
-        const bookings = await Booking.find({ requester: userId,type: "requesting"  });
+        const bookings = await Booking.find({ requester: userId, type: "requesting" }).populate('provider');
 
         if (!bookings.length) {
-            return res.status(201).json({ message: "No bookings found for this user" });
+            return res.status(404).json({ message: "No bookings found for this user" });
         }
 
         res.status(200).json({ success: true, message: "Bookings retrieved successfully", data: bookings });
@@ -79,11 +79,11 @@ export const respondToBooking = async (req, res) => {
         return res.status(403).json({ message: "You are not authorized to respond to this booking" });
       }
   
-      if (action === 'reject') {
+      if (action == 'reject') {
         booking.status = 'rejected';
         await booking.save();
         return res.status(200).json({ success: true, message: "Booking rejected successfully" });
-      } else if (action === 'accept') {
+      } else if (action == 'accept') {
         booking.status = 'accepted';
         await booking.save();
         return res.status(200).json({ success: true, message: "Booking accepted successfully" });
@@ -95,6 +95,43 @@ export const respondToBooking = async (req, res) => {
     }
   };
 
+
+  export const scheduleBookingDate = async (req, res) => {
+    try {
+      const { bookingId, date } = req.body;
+      const userId = req.user._id;
+  
+      if (!bookingId || !date) {
+        return res.status(400).json({ error: "Booking ID and date are required" });
+      }
+  
+      // Find the booking by ID
+      const booking = await Booking.findById(bookingId);
+  
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+  
+      // Check if the user is the provider and if the booking is accepted
+      if (booking.provider.toString() !== userId.toString()) {
+        return res.status(403).json({ message: "You are not authorized to schedule this booking" });
+      }
+  
+      if (booking.status !== "accepted") {
+        return res.status(400).json({ message: "Booking must be accepted before scheduling a date" });
+      }
+  
+      // Update the booking date
+      booking.date = date;
+      booking.status = "scheduled"; // Optional new status to track scheduled bookings
+      await booking.save();
+  
+      res.status(200).json({ success: true, message: "Booking date scheduled successfully", data: booking });
+    } catch (err) {
+      res.status(500).json({ success: false, message: "An error occurred while scheduling the booking date", error: err.message });
+    }
+  };
+  
 
   // Mark booking as completed
 export const completeBooking = async (req, res) => {
