@@ -61,7 +61,7 @@ const OfferingBookings = () => {
             Booking Type: {booking.type}
           </h2>
           <p className="text-black bg-zinc-200 p-2 rounded my-1">
-            Status: {booking.status}
+            Status: <span className={`capitalize font-bold ml-1 ${booking.status == "accept" ? "text-green-500" : "text-red-500"}`}>{booking.status}</span>
           </p>
           <select
             value={booking.status}

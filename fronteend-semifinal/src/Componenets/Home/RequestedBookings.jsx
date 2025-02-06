@@ -24,17 +24,27 @@ const RequestedBookings = () => {
           key={booking._id}
           className="bg-gray-800 border-[1px] border-white text-white shadow-md rounded-lg p-4"
         >
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl font-semibold capitalize">
             Booking Type: {booking.type}
           </h2>
-          <p className="text-black bg-zinc-200 p-2 rounded my-1">
-            Status: {booking.status}{" "}
+
+          <p className="text-black bg-zinc-200 p-2 rounded my-1 font-bold ml-1">
+            Status:{" "}
+            <span
+              className={`capitalize text-black bg-zinc-200 p-2 rounded my-1 font-bold ml-1 ${
+                booking.status == "accept" ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {booking.status}{" "}
+            </span>
             {booking.status === "accepted" && (
               <FaCheckCircle className="inline text-green-500 ml-2" />
             )}{" "}
             {/* Green tick for accepted status */}
           </p>
-          <p className="text-black bg-zinc-200 p-2 rounded my-1">Provider: {booking.provider.fullName}</p>
+          <p className="text-black bg-zinc-200 p-2 rounded my-1">
+            Provider: {booking.provider.fullName}
+          </p>
           <p className="text-black bg-zinc-200 p-2 rounded my-1">
             Requester: {booking.requester.fullName}
           </p>
