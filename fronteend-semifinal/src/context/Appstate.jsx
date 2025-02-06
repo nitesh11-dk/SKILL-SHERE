@@ -3,6 +3,7 @@ import AppContext from "./AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { BASE_URL } from "../constants/config.js";
+// Ensure useNavigate is imported
 
 const Appstate = (props) => {
   const [token, setToken] = useState(null);
@@ -32,6 +33,7 @@ const Appstate = (props) => {
     setIsLoggedIn(false);
     setReload1(!reload1);
     localStorage.removeItem("token");
+    toast.success("You have been logged out successfully."); // Use navigate instead of history
   };
 
   const loginUser = async (email, password) => {
@@ -342,6 +344,7 @@ const Appstate = (props) => {
         creatBooking,
         reqestedBookings,
         offeringBookings,
+        logoutUser,
       }}
     >
       {props.children}
