@@ -42,7 +42,7 @@ const OfferingBookings = () => {
   const handleDateChange = async (bookingId, date) => {
     // Function to handle date change
     // console.log(`Date changed for booking ${bookingId}: ${newDate}`);
-    await scheduleBookingDate({ bookingId, date });
+    // await scheduleBookingDate({ bookingId, date });
     // Additional logic for handling the date change can be added here
   };
 

@@ -406,7 +406,7 @@ const Appstate = (props) => {
         offeringBookings,
         logoutUser,
         setBookingStatus,
-        scheduleBookingDate,
+        // scheduleBookingDate,
       }}
     >
       {props.children}
