@@ -22,26 +22,26 @@ const RequestedBookings = () => {
       {bookings.map((booking) => (
         <div
           key={booking._id}
-          className="bg-gray-800 text-white shadow-md rounded-lg p-4"
+          className="bg-gray-800 border-[1px] border-white text-white shadow-md rounded-lg p-4"
         >
           <h2 className="text-xl font-semibold">
             Booking Type: {booking.type}
           </h2>
-          <p className="text-gray-300">
+          <p className="text-black bg-zinc-200 p-2 rounded my-1">
             Status: {booking.status}{" "}
             {booking.status === "accepted" && (
               <FaCheckCircle className="inline text-green-500 ml-2" />
             )}{" "}
             {/* Green tick for accepted status */}
           </p>
-          <p className="text-gray-300">Provider: {booking.provider.fullName}</p>
-          <p className="text-gray-300">
+          <p className="text-black bg-zinc-200 p-2 rounded my-1">Provider: {booking.provider.fullName}</p>
+          <p className="text-black bg-zinc-200 p-2 rounded my-1">
             Requester: {booking.requester.fullName}
           </p>
-          <p className="text-gray-300">
+          <p className="text-black bg-zinc-200 p-2 rounded my-1">
             Is Barter Exchange: {booking.isBarterExchange ? "Yes" : "No"}
           </p>
-          <p className="text-gray-300">
+          <p className="text-black bg-zinc-200 p-2 rounded my-1">
             Skills to Learn: {booking.skillsToLearn.join(", ")}
           </p>
         </div>

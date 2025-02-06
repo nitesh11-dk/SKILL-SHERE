@@ -24,7 +24,7 @@ const LandingPage = () => {
             collaborate in real time.
           </p>
           <Link to="/register">
-            <button className="mt-6 px-6 py-3 text-lg bg-blue-500 hover:bg-blue-600 rounded-xl shadow-lg">
+            <button className="mt-6 px-6 py-3 text-lg bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold shadow-lg">
               Get Started
             </button>
           </Link>

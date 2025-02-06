@@ -10,7 +10,7 @@ const Navbar = () => {
   return (
     <div className="bg-gray-900">
       <header className="py-6 px-12 flex justify-between items-center border-b border-gray-700">
-        <h1 className="text-3xl font-bold">SkillShareHub</h1>
+        <h1 className="text-3xl font-bold">Skill-Sync</h1>
         <nav>
           <ul className="flex gap-8 text-lg">
             {isLoggedIn ? (
@@ -25,10 +25,14 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to={"/register"}>
-                  <li className="hover:text-blue-400 cursor-pointer">Signup</li>
+                  <li className="hover:text-blue-400 inline-block font-semibold text-2xl cursor-pointer">
+                    Signup
+                  </li>
                 </Link>
                 <Link to={"/login"}>
-                  <li className="hover:text-blue-400 cursor-pointer">Login</li>
+                  <li className="hover:text-blue-400 inline-block font-semibold text-2xl cursor-pointer">
+                    Login
+                  </li>
                 </Link>
               </>
             )}

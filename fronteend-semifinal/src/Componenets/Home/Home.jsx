@@ -6,27 +6,43 @@ import {
   FaHandHoldingHeart,
 } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useContext } from "react";
+import AppContext from "../../context/AppContext";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const { logoutUser } = useContext(AppContext);
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden text-white">
       {/* Sidebar */}
-      <nav className="w-1/4 md:w-1/3 lg:w-1/4 bg-gray-800 p-6 flex flex-col justify-between">
+      <nav className="w-1/4 md:w-1/3 lg:w-1/5 bg-gray-800 p-6 flex flex-col justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-blue-400 mb-8">
-            SkillShareHub
+          <h2 className="text-2xl  font-bold text-blue-400 mb-8 flex items-center justif-between">
+            Skill-Sync{" "}
+            <button
+              onClick={() => {
+                logoutUser();
+                navigate("/");
+              }}
+              className="text-red-800 bg-red-300 relative -right-16  px-1 mx-2 rounded hover:text-red-700"
+            >
+              Logout
+            </button>
           </h2>
           <ul className="space-y-6">
             <li>
               <NavLink
-                to="/home"
+                to="/home/dashboard"
                 className={({ isActive }) =>
-                  isActive ? "text-blue-400" : "text-gray-400 hover:text-white"
+                  isActive
+                    ? "text-blue-400"
+                    : "text-gray-400 hover:text-white"
                 }
               >
-                <FaHome className="inline mr-2" /> Home
+                <FaHome className="inline text-2xl mr-2" />{" "}
+                <span className="text-2xl relative top-1">Home</span>
               </NavLink>
             </li>
             <li>
@@ -36,7 +52,10 @@ const Home = () => {
                   isActive ? "text-green-400" : "text-gray-400 hover:text-white"
                 }
               >
-                <FaUsers className="inline mr-2" /> Requests Bookings
+                <FaUsers className="inline text-2xl mr-2" />{" "}
+                <span className="text-2xl relative top-1">
+                  Requests Bookings
+                </span>
               </NavLink>
             </li>
             <li>
@@ -48,8 +67,10 @@ const Home = () => {
                     : "text-gray-400 hover:text-white"
                 }
               >
-                <FaHandHoldingHeart className="inline mr-2" /> Offerening
-                Bookings
+                <FaHandHoldingHeart className="inline text-2xl mr-2" />{" "}
+                <span className="text-2xl relative top-1">
+                  Offerening Bookings
+                </span>
               </NavLink>
             </li>
             <li>
@@ -59,7 +80,9 @@ const Home = () => {
                   isActive ? "text-blue-400" : "text-gray-400 hover:text-white"
                 }
               >
-                <FaChalkboardTeacher className="inline mr-2" /> Calender Booking
+                <FaChalkboardTeacher className="inline text-2xl mr-2" />{" "}
+                <span className="text-2xl relative top-1">Calender Booking</span>
+                
               </NavLink>
             </li>
             <li>
@@ -69,7 +92,7 @@ const Home = () => {
                   isActive ? "text-blue-400" : "text-gray-400 hover:text-white"
                 }
               >
-                <CgProfile className="inline mr-2" /> Profile
+                <CgProfile className="inline text-2xl mr-2" /> Profile
               </NavLink> */}
             </li>
           </ul>

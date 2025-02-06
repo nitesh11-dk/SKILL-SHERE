@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AppContext from "../../context/AppContext"; // Import AppContext
 
 const Login = () => {
@@ -40,7 +40,6 @@ const Login = () => {
         // Clear the form data
         setFormData({ email: "", password: "" });
 
-
         navigate("/select-skills");
       } else {
         toast.error("Login failed", {
@@ -69,9 +68,7 @@ const Login = () => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
       <div className="w-full max-w-md bg-gray-800 rounded-lg p-6 shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-4">
-          Login
-        </h2>
+        <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm mb-1" htmlFor="email">
@@ -110,8 +107,10 @@ const Login = () => {
           >
             Login
           </button>
+          <p className="text-center text-lg text-gray-400">
+            Don't Have an account <Link to="/register">register</Link>
+          </p>
         </form>
-
       </div>
     </div>
   );

@@ -91,7 +91,7 @@ const UserForm = ({ initialData, onSubmit, buttonText }) => {
           >
             {buttonText}
           </button>
-          <p>
+          <p className="text-center text-lg text-gray-400">
             Already Have an Account <Link to="/login">Sign In</Link>
           </p>
         </form>

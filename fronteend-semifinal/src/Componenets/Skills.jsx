@@ -22,6 +22,7 @@ const Skills = () => {
     e.preventDefault();
     handleAddSkills(formData);
     console.log("Submitting data:", formData);
+    setFormData({ title: "", category: "frontend" });
   };
 
   return (

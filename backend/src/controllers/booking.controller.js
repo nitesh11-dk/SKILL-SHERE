@@ -48,7 +48,7 @@ export const getOfferingBookings = async (req, res) => {
 export const getRequesterBookings = async (req, res) => {
     try {
         const userId = req.user._id;
-        const bookings = await Booking.find({ requester: userId, type: "requesting" }).populate('provider');
+        const bookings = await Booking.find({ requester: userId, type: "requesting" }).populate('provider requester');
 
         if (!bookings.length) {
             return res.status(404).json({ message: "No bookings found for this user" });

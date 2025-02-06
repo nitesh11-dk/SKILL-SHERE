@@ -53,15 +53,20 @@ const OfferingBookings = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
       {bookings.map((booking) => (
-        <div key={booking._id} className="bg-white shadow-md rounded-lg p-4">
+        <div
+          key={booking._id}
+          className="bg-gray-800 border-[1px] border-white shadow-md rounded-lg p-4"
+        >
           <h2 className="text-xl font-semibold">
             Booking Type: {booking.type}
           </h2>
-          <p className="text-gray-700">Status: {booking.status}</p>
+          <p className="text-black bg-zinc-200 p-2 rounded my-1">
+            Status: {booking.status}
+          </p>
           <select
             value={booking.status}
             onChange={(e) => handleStatusChange(booking._id, e.target.value)}
-            className="mt-2 p-2 border rounded"
+            className="mt-2 p-2 border text-black bg-zinc-200 p-2 rounded my-1 w-1/2 rounded"
             disabled={
               booking.status === "accept" || booking.status === "reject"
             }
@@ -70,21 +75,23 @@ const OfferingBookings = () => {
             <option value="accept">Accept</option>
             <option value="reject">Reject</option>
           </select>
-          {booking.status === "accept" && (
+          {/* {booking.status === "accept" && (
             <input
               type="date"
               onChange={(e) => handleDateChange(booking._id, e.target.value)}
               className="mt-2 p-2 border rounded"
             />
-          )}
-          <p className="text-gray-700">Provider: {booking.provider.fullName}</p>
-          <p className="text-gray-700">
+          )} */}
+          <p className="text-white mt-1 text-xl">
+            Provider: {booking.provider.fullName}
+          </p>
+          <p className="text-white mt-1 text-xl">
             Requester: {booking.requester.fullName}
           </p>
-          <p className="text-gray-700">
+          <p className="text-white mt-1 text-xl">
             Is Barter Exchange: {booking.isBarterExchange ? "Yes" : "No"}
           </p>
-          <p className="text-gray-700">
+          <p className="text-white mt-1 text-xl">
             Barter Skills: {booking.barterSkill.join(", ") || "None"}
           </p>
         </div>
