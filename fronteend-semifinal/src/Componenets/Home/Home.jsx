@@ -36,9 +36,7 @@ const Home = () => {
               <NavLink
                 to="/home/dashboard"
                 className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-400"
-                    : "text-gray-400 hover:text-white"
+                  isActive ? "text-blue-400" : "text-gray-400 hover:text-white"
                 }
               >
                 <FaHome className="inline text-2xl mr-2" />{" "}
@@ -81,8 +79,9 @@ const Home = () => {
                 }
               >
                 <FaChalkboardTeacher className="inline text-2xl mr-2" />{" "}
-                <span className="text-2xl relative top-1">Calender Booking</span>
-                
+                <span className="text-2xl relative top-1">
+                  Calender Booking
+                </span>
               </NavLink>
             </li>
             <li>
@@ -99,7 +98,7 @@ const Home = () => {
         </div>
 
         <footer className="text-gray-400 mt-auto">
-          <p>&copy; 2025 SkillShareHub. All rights reserved.</p>
+          <p>&copy; 2025 Skill-Sync Avinya </p>
         </footer>
       </nav>
 
