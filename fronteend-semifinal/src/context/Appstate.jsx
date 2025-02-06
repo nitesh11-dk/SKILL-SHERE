@@ -292,6 +292,7 @@ const Appstate = (props) => {
         console.log("Response from adding skills:", response.data); // Added console log
         if (response.data.success) {
           toast.success(response.data.message);
+          return response.data;
         } else {
           toast.error(response.data.message);
         }

@@ -1,10 +1,11 @@
 import {
   FaChalkboardTeacher,
   FaUsers,
-  FaLaptopCode,
+  // CgProfile,
   FaHome,
   FaHandHoldingHeart,
 } from "react-icons/fa";
+import { CgProfile } from "react-icons/cg";
 import { NavLink, Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -53,13 +54,23 @@ const Home = () => {
             </li>
             <li>
               <NavLink
-                to="/skills"
+                to="/home/schedule-booking"
                 className={({ isActive }) =>
                   isActive ? "text-blue-400" : "text-gray-400 hover:text-white"
                 }
               >
-                <FaChalkboardTeacher className="inline mr-2" /> Skills
+                <FaChalkboardTeacher className="inline mr-2" /> Calender Booking
               </NavLink>
+            </li>
+            <li>
+              {/* <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  isActive ? "text-blue-400" : "text-gray-400 hover:text-white"
+                }
+              >
+                <CgProfile className="inline mr-2" /> Profile
+              </NavLink> */}
             </li>
           </ul>
         </div>
