@@ -1,45 +1,49 @@
-import { FaChalkboardTeacher, FaUsers, FaLaptopCode } from "react-icons/fa";
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useContext } from "react";
 import AppContext from "../context/AppContext";
+
+const NavLink = ({ to, children }) => (
+  <Link to={to}>
+    <li className="hover:text-blue-400 inline-block font-semibold text-xl cursor-pointer transition-colors duration-200">
+      {children}
+    </li>
+  </Link>
+);
 
 const Navbar = () => {
   const { logoutUser, isLoggedIn } = useContext(AppContext);
 
   return (
-    <div className="bg-gray-900">
-      <header className="py-6 px-12 flex justify-between items-center border-b border-gray-700">
-        <h1 className="text-3xl font-bold">Skill-Sync</h1>
-        <nav>
-          <ul className="flex gap-8 text-lg">
+    <nav className="bg-gray-900 border-b border-gray-700">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <Link to="/" className="flex items-center">
+            <h1 className="text-2xl font-bold text-white hover:text-blue-400 transition-colors duration-200">
+              Skill-Sync
+            </h1>
+          </Link>
+
+          <ul className="flex items-center gap-8">
             {isLoggedIn ? (
               <>
+                <NavLink to="/home/dashboard">Dashboard</NavLink>
                 <li
-                  className="hover:text-blue-400 cursor-pointer"
                   onClick={logoutUser}
+                  className="hover:text-blue-400 font-semibold text-xl cursor-pointer transition-colors duration-200"
                 >
                   Logout
                 </li>
               </>
             ) : (
               <>
-                <Link to={"/register"}>
-                  <li className="hover:text-blue-400 inline-block font-semibold text-2xl cursor-pointer">
-                    Signup
-                  </li>
-                </Link>
-                <Link to={"/login"}>
-                  <li className="hover:text-blue-400 inline-block font-semibold text-2xl cursor-pointer">
-                    Login
-                  </li>
-                </Link>
+                <NavLink to="/register">Sign Up</NavLink>
+                <NavLink to="/login">Login</NavLink>
               </>
             )}
           </ul>
-        </nav>
-      </header>
-    </div>
+        </div>
+      </div>
+    </nav>
   );
 };
 

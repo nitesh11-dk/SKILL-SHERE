@@ -1,100 +1,151 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { FaUser, FaEnvelope, FaLock, FaUserCircle } from "react-icons/fa";
 
-const UserForm = ({ initialData, onSubmit, buttonText }) => {
-  const [formData, setFormData] = useState(initialData);
+const FormInput = ({ label, icon: Icon, error, ...props }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-300 mb-1">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <Icon className="h-5 w-5 text-gray-400" />
+      </div>
+      <input
+        className={`w-full pl-10 pr-3 py-2 rounded-md bg-gray-700 text-white border 
+          ${error ? 'border-red-500' : 'border-gray-600'} 
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+        {...props}
+      />
+    </div>
+    {error && (
+      <p className="mt-1 text-sm text-red-500">
+        {error.message}
+      </p>
+    )}
+  </div>
+);
+
+const UserForm = ({ initialData, onSubmit: submitHandler, buttonText }) => {
   const navigate = useNavigate();
+  const isRegister = buttonText === "Register";
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    defaultValues: initialData
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const success = await onSubmit(formData);
-    setFormData(initialData);
-    if (buttonText === "Register") navigate("/login"); // Redirect to login for register
-    if (buttonText === "Update") navigate("/profile");
+  const onSubmit = async (data) => {
+    const success = await submitHandler(data);
+    if (success) {
+      if (isRegister) {
+        navigate("/login");
+      } else {
+        navigate("/profile");
+      }
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
-      <div className="w-full max-w-md bg-gray-800 rounded-lg p-6 shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-4">
-          {buttonText === "Register" ? "Register" : "Edit User"}
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1" htmlFor="username">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Enter your username"
-              className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring focus:ring-indigo-500"
-              required
-            />
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+      <div className="w-full max-w-md">
+        <div className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white">
+              {isRegister ? "Create Account" : "Edit Profile"}
+            </h2>
+            {isRegister && (
+              <p className="mt-2 text-gray-400">
+                Please fill in the information below
+              </p>
+            )}
           </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="fullName">
-              Fullname
-            </label>
-            <input
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <FormInput
+              label="Username"
               type="text"
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="Enter your username"
-              className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring focus:ring-indigo-500"
-              required
+              icon={FaUser}
+              error={errors.username}
+              {...register("username", {
+                required: "Username is required",
+                minLength: {
+                  value: 3,
+                  message: "Username must be at least 3 characters"
+                }
+              })}
             />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="email">
-              Email
-            </label>
-            <input
+
+            <FormInput
+              label="Full Name"
+              type="text"
+              icon={FaUserCircle}
+              error={errors.fullName}
+              {...register("fullName", {
+                required: "Full name is required",
+                minLength: {
+                  value: 2,
+                  message: "Full name must be at least 2 characters"
+                }
+              })}
+            />
+
+            <FormInput
+              label="Email Address"
               type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring focus:ring-indigo-500"
-              required
+              icon={FaEnvelope}
+              error={errors.email}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address"
+                }
+              })}
             />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="password">
-              Password
-            </label>
-            <input
+
+            <FormInput
+              label="Password"
               type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring focus:ring-indigo-500"
-              required={buttonText === "Register"} // Make password optional for editing
+              icon={FaLock}
+              error={errors.password}
+              {...register("password", {
+                ...(isRegister && {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters"
+                  }
+                })
+              })}
             />
-          </div>
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
-          >
-            {buttonText}
-          </button>
-          <p className="text-center text-lg text-gray-400">
-            Already Have an Account <Link to="/login">Sign In</Link>
-          </p>
-        </form>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md
+                transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Processing..." : buttonText}
+            </button>
+
+            {isRegister && (
+              <p className="text-center text-gray-400">
+                Already have an account?{" "}
+                <Link 
+                  to="/login" 
+                  className="text-blue-400 hover:text-blue-300 font-medium"
+                >
+                  Sign in
+                </Link>
+              </p>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );

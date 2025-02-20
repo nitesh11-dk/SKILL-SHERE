@@ -1,116 +1,96 @@
-import React, { useState, useContext } from "react";
-import { toast } from "react-toastify";
+import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AppContext from "../../context/AppContext"; // Import AppContext
+import { useForm } from "react-hook-form";
+import AppContext from "../../context/AppContext";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+  const navigate = useNavigate();
+  const { loginUser } = useContext(AppContext);
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: ""
+    }
   });
 
-  const navigate = useNavigate();
-  const { loginUser } = useContext(AppContext); // Add loginAdmin from context
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const { email, password } = formData;
-
-    try {
-      let message;
-      message = await loginUser(email, password);
-
-      if (message) {
-        toast.success(message, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "dark",
-        });
-
-        // Clear the form data
-        setFormData({ email: "", password: "" });
-
-        navigate("/select-skills");
-      } else {
-        toast.error("Login failed", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "dark",
-        });
-      }
-    } catch (error) {
-      toast.error(error.message || "Something went wrong", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "dark",
-      });
+  const onSubmit = async (data) => {
+    const success = await loginUser(data.email, data.password);
+    if (success) {
+      navigate("/select-skills");
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
-      <div className="w-full max-w-md bg-gray-800 rounded-lg p-6 shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1" htmlFor="email">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring focus:ring-indigo-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="password">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring focus:ring-indigo-500"
-              required
-            />
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+      <div className="w-full max-w-md">
+        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-white text-center mb-6">Login</h2>
 
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-md focus:outline-none focus:ring focus:ring-indigo-500"
-          >
-            Login
-          </button>
-          <p className="text-center text-lg text-gray-400">
-            Don't Have an account <Link to="/register">register</Link>
-          </p>
-        </form>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                className={`w-full px-3 py-2 rounded-md bg-gray-700 text-white border 
+                  ${errors.email ? 'border-red-500' : 'border-gray-600'} 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                className={`w-full px-3 py-2 rounded-md bg-gray-700 text-white border 
+                  ${errors.password ? 'border-red-500' : 'border-gray-600'} 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                {...register("password", {
+                  required: "Password is required"
+                })}
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md
+                transition-colors duration-200"
+            >
+              Login
+            </button>
+
+            <p className="text-center text-gray-400 mt-4">
+              Don't have an account?{" "}
+              <Link 
+                to="/register" 
+                className="text-blue-400 hover:text-blue-300 font-medium"
+              >
+                Register
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );

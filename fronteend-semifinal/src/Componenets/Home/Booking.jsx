@@ -1,95 +1,102 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
+import { useForm, Controller } from "react-hook-form";
 import AppContext from "../../context/AppContext";
 
 const Booking = ({ user_skills, provider, onClose }) => {
-  // Added onClose prop
-  const [bookingData, setBookingData] = useState({
-    provider,
-    type: "requesting",
-    skillsToLearn: [],
-    isBarterExchange: true,
-    barterSkill: [],
-  });
   const { creatBooking } = useContext(AppContext);
-
-  const [error, setError] = useState(""); // State to hold error message
-
   const skills = user_skills.map((s) => s.title);
 
-  const handleSkillChange = (skill) => {
-    setBookingData((prev) => ({
-      ...prev,
-      skillsToLearn: prev.skillsToLearn.includes(skill)
-        ? prev.skillsToLearn.filter((s) => s !== skill)
-        : [...prev.skillsToLearn, skill],
-    }));
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setBookingData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (bookingData.skillsToLearn.length === 0) {
-      setError("At least one skill to learn is required."); // Set error message
-      return;
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    defaultValues: {
+      provider,
+      type: "requesting",
+      skillsToLearn: [],
+      isBarterExchange: true,
+      barterSkill: [],
     }
-    setError(""); // Clear error message
-    creatBooking(bookingData);
-    onClose();
+  });
+
+  const onSubmit = async (data) => {
+    const response = await creatBooking(data);
+    if (response?.success) {
+      onClose();
+    }
   };
 
   return (
-    <div className="absolute w-1/2 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 backdrop-blur-md">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-900 p-6 rounded-lg shadow-md w-full relative" // Added relative for positioning
-      >
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-gray-900 p-6 rounded-lg shadow-md w-full max-w-2xl relative">
         <button
           type="button"
-          onClick={onClose} // Close form on click
-          className="absolute top-2 text-5xl right-5 text-gray-400 hover:text-white" // Close button styling
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200"
         >
-          &times; {/* Close icon */}
+          <span className="text-2xl">&times;</span>
         </button>
-        <h2 className="text-white text-3xl mb-4">Create Booking</h2>
-        {error && <p className="text-red-500">{error}</p>}{" "}
-        {/* Display error message */}
-        <div className="mb-4">
-          <label className="text-gray-300 text-lg">Type:</label>
-          <p className="mt-1 block w-full text-xl p-2 bg-gray-700 text-white rounded-md">
-            Requesting
-          </p>
-        </div>
-        <div className="mb-4">
-          <label className="text-gray-300 text-lg">Skills to Learn:</label>
-          <div className="flex flex-col mt-1">
-            {skills.map((skill) => (
-              <label key={skill} className="flex items-center text-xl">
-                <input
-                  type="checkbox"
-                  value={skill}
-                  onChange={() => handleSkillChange(skill)}
-                  className="mr-2"
-                />
-                {skill}
-              </label>
-            ))}
+
+        <h2 className="text-white text-2xl font-bold mb-6">Create Booking</h2>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <label className="block text-gray-300 text-lg mb-2">Type:</label>
+            <p className="block w-full text-lg p-2 bg-gray-700 text-white rounded-md">
+              Requesting
+            </p>
           </div>
-        </div>
-        <div className="mb-4"></div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-xl p-2 rounded-md text-white"
-        >
-          Create Booking
-        </button>
-      </form>
+
+          <div>
+            <label className="block text-gray-300 text-lg mb-2">
+              Skills to Learn:
+            </label>
+            <Controller
+              name="skillsToLearn"
+              control={control}
+              rules={{ 
+                required: "Please select at least one skill",
+                validate: value => value.length > 0 || "At least one skill is required"
+              }}
+              render={({ field: { onChange, value } }) => (
+                <div className="space-y-2">
+                  {skills.map((skill) => (
+                    <label key={skill} className="flex items-center text-lg text-white">
+                      <input
+                        type="checkbox"
+                        checked={value.includes(skill)}
+                        onChange={(e) => {
+                          const newValue = e.target.checked
+                            ? [...value, skill]
+                            : value.filter(s => s !== skill);
+                          onChange(newValue);
+                        }}
+                        className="mr-3 h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                      />
+                      {skill}
+                    </label>
+                  ))}
+                </div>
+              )}
+            />
+            {errors.skillsToLearn && (
+              <p className="mt-2 text-sm text-red-500">
+                {errors.skillsToLearn.message}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg py-2 px-4 rounded-md
+              transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? "Creating..." : "Create Booking"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

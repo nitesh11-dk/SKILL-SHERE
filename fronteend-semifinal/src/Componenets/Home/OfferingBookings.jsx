@@ -1,101 +1,168 @@
 import React, { useContext, useEffect, useState } from "react";
+import { FaUser, FaExchangeAlt, FaBookReader, FaClock } from "react-icons/fa";
 import AppContext from "../../context/AppContext";
+
+const StatusBadge = ({ status }) => {
+  const colors = {
+    pending: "bg-yellow-500",
+    accept: "bg-green-500",
+    reject: "bg-red-500"
+  };
+
+  return (
+    <span className={`${colors[status]} text-white px-3 py-1 rounded-full text-sm font-medium`}>
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+const BookingCard = ({ booking, onStatusChange }) => {
+  const isStatusLocked = booking.status === "accept" || booking.status === "reject";
+
+  return (
+    <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors duration-200">
+      <div className="p-5 space-y-4">
+        {/* Header */}
+        <div className="flex justify-between items-start">
+          <h3 className="text-lg font-semibold text-white capitalize">
+            {booking.type} Session
+          </h3>
+          <StatusBadge status={booking.status} />
+        </div>
+
+        {/* Status Control */}
+        {!isStatusLocked && (
+          <div className="flex items-center space-x-2">
+            <select
+              value={booking.status}
+              onChange={(e) => onStatusChange(booking._id, e.target.value)}
+              className="flex-1 bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="pending">Pending</option>
+              <option value="accept">Accept</option>
+              <option value="reject">Reject</option>
+            </select>
+          </div>
+        )}
+
+        {/* Details */}
+        <div className="space-y-3">
+          <div className="flex items-center text-gray-300">
+            <FaUser className="w-5 h-5 mr-2" />
+            <div>
+              <p className="text-sm text-gray-400">Provider</p>
+              <p className="text-white">{booking.provider.fullName}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center text-gray-300">
+            <FaBookReader className="w-5 h-5 mr-2" />
+            <div>
+              <p className="text-sm text-gray-400">Requester</p>
+              <p className="text-white">{booking.requester.fullName}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center text-gray-300">
+            <FaExchangeAlt className="w-5 h-5 mr-2" />
+            <div>
+              <p className="text-sm text-gray-400">Barter Exchange</p>
+              <p className="text-white">{booking.isBarterExchange ? "Yes" : "No"}</p>
+            </div>
+          </div>
+
+          {booking.barterSkill?.length > 0 && (
+            <div className="flex items-start text-gray-300">
+              <FaClock className="w-5 h-5 mr-2 mt-1" />
+              <div>
+                <p className="text-sm text-gray-400">Barter Skills</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {booking.barterSkill.map((skill, index) => (
+                    <span 
+                      key={index}
+                      className="bg-gray-700 text-blue-400 px-2 py-1 rounded text-sm"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const OfferingBookings = () => {
   const [bookings, setBookings] = useState([]);
-  const { offeringBookings, setBookingStatus, scheduleBookingDate } =
-    useContext(AppContext);
+  const [isLoading, setIsLoading] = useState(true);
+  const { offeringBookings, setBookingStatus } = useContext(AppContext);
 
-  const fetchUser = async () => {
-    const response = await offeringBookings();
-    if (response && response.data) {
-      setBookings(response.data);
-    }
-  };
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setIsLoading(true);
+        const response = await offeringBookings();
+        if (response?.data) {
+          setBookings(response.data);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [offeringBookings]);
 
   const handleStatusChange = async (bookingId, action) => {
     const booking = bookings.find((b) => b._id === bookingId);
     if (booking.status === "accept" || booking.status === "reject") {
-      alert("Once accepted or rejected, the status cannot be changed.");
       return;
     }
 
-    let res = await setBookingStatus({ bookingId, action });
-    if (res.success) {
-      // Update the booking status in the local state
-      setBookings((prevBookings) =>
-        prevBookings.map((booking) =>
+    const response = await setBookingStatus({ bookingId, action });
+    if (response?.success) {
+      setBookings(prevBookings =>
+        prevBookings.map(booking =>
           booking._id === bookingId
-            ? {
-                ...booking,
-                status: action,
-                date: action === "accept" ? "" : booking.date,
-              }
+            ? { ...booking, status: action }
             : booking
         )
       );
-    } else {
-      // Handle error case if needed
     }
   };
 
-  const handleDateChange = async (bookingId, date) => {
-    // Function to handle date change
-    // console.log(`Date changed for booking ${bookingId}: ${newDate}`);
-    // await scheduleBookingDate({ bookingId, date });
-    // Additional logic for handling the date change can be added here
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <p className="text-gray-400 text-xl">Loading bookings...</p>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  if (!bookings.length) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <p className="text-gray-400 text-xl">No bookings found</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-      {bookings.map((booking) => (
-        <div
-          key={booking._id}
-          className="bg-gray-800 border-[1px] border-white shadow-md rounded-lg p-4"
-        >
-          <h2 className="text-xl font-semibold">
-            Booking Type: {booking.type}
-          </h2>
-          <p className="text-black bg-zinc-200 p-2 rounded my-1">
-            Status: <span className={`capitalize font-bold ml-1 ${booking.status == "accept" ? "text-green-500" : "text-red-500"}`}>{booking.status}</span>
-          </p>
-          <select
-            value={booking.status}
-            onChange={(e) => handleStatusChange(booking._id, e.target.value)}
-            className="mt-2 p-2 border text-black bg-zinc-200 p-2 rounded my-1 w-1/2 rounded"
-            disabled={
-              booking.status === "accept" || booking.status === "reject"
-            }
-          >
-            <option value="pending">Pending</option>
-            <option value="accept">Accept</option>
-            <option value="reject">Reject</option>
-          </select>
-          {/* {booking.status === "accept" && (
-            <input
-              type="date"
-              onChange={(e) => handleDateChange(booking._id, e.target.value)}
-              className="mt-2 p-2 border rounded"
-            />
-          )} */}
-          <p className="text-white mt-1 text-xl">
-            Provider: {booking.provider.fullName}
-          </p>
-          <p className="text-white mt-1 text-xl">
-            Requester: {booking.requester.fullName}
-          </p>
-          <p className="text-white mt-1 text-xl">
-            Is Barter Exchange: {booking.isBarterExchange ? "Yes" : "No"}
-          </p>
-          <p className="text-white mt-1 text-xl">
-            Barter Skills: {booking.barterSkill.join(", ") || "None"}
-          </p>
-        </div>
-      ))}
+    <div className="p-6 bg-gray-900">
+      <h1 className="text-2xl font-bold text-white mb-6">Offering Bookings</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {bookings.map((booking) => (
+          <BookingCard
+            key={booking._id}
+            booking={booking}
+            onStatusChange={handleStatusChange}
+          />
+        ))}
+      </div>
     </div>
   );
 };

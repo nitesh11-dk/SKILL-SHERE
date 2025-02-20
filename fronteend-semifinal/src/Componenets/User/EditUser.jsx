@@ -3,15 +3,30 @@ import AppContext from "../../context/AppContext";
 import UserForm from "./Form";
 
 const EditUser = () => {
-  const { updateProfile , user } = useContext(AppContext); 
+  const { updateProfile, user } = useContext(AppContext);
 
-  const initialData = { name: user?.name, email: user?.email, password: "" }; 
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <p className="text-gray-400 text-xl">Loading user profile...</p>
+      </div>
+    );
+  }
 
-  const handleEdit = async (formData) => {
-    return await updateProfile(formData);
+  const initialData = {
+    fullName: user.fullName || "",
+    email: user.email || "",
+    username: user.username || "",
+    password: ""
   };
 
-  return <UserForm initialData={initialData} onSubmit={handleEdit} buttonText="Update" />;
+  return (
+    <UserForm
+      initialData={initialData}
+      onSubmit={updateProfile}
+      buttonText="Update Profile"
+    />
+  );
 };
 
 export default EditUser;
