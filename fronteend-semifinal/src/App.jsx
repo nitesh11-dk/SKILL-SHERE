@@ -14,17 +14,8 @@ import Skills from "./Componenets/Skills.jsx";
 import UserDetails from "./Componenets/Home/UserDetails.jsx";
 import RequestedBookings from "./Componenets/Home/RequestedBookings.jsx";
 import OfferingBookings from "./Componenets/Home/OfferingBookings.jsx";
-import Schedular from "./Componenets/Home/Schedular.jsx";
-import "@syncfusion/ej2-react-schedule/styles/material.css";
-import "@syncfusion/ej2-base/styles/material.css";
-import "@syncfusion/ej2-buttons/styles/material.css";
-import "@syncfusion/ej2-calendars/styles/material.css";
-import "@syncfusion/ej2-dropdowns/styles/material.css";
-import "@syncfusion/ej2-inputs/styles/material.css";
-import "@syncfusion/ej2-navigations/styles/material.css";
-import "@syncfusion/ej2-popups/styles/material.css";
-import "@syncfusion/ej2-splitbuttons/styles/material.css";
 
+import Calendar from "./Componenets/Calendar/Calendar.jsx"
 const App = () => {
   return (
     <Router>
@@ -39,7 +30,7 @@ const App = () => {
             path="/home/requested-bookings"
             element={<RequestedBookings />}
           />
-<Route path="/home/schedule-booking" element={<Schedular />} />
+<Route path="/home/schedule-booking" element={<Calendar />} />
           <Route path="/home/offered-bookings" element={<OfferingBookings />} />
         </Route>
         <Route path="/register" element={<Register />} />
@@ -48,6 +39,8 @@ const App = () => {
         <Route path="/edituser" element={<EditUser />} />
       </Routes>
     </Router>
+
+
   );
 };
 
