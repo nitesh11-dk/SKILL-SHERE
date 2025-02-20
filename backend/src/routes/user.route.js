@@ -4,7 +4,6 @@ import {
   registerUser,
   loginUser,
   editUser,
-  getProfile,
   getUserById
 } from "../controllers/user.controller.js";
 import { AuthenticateUser } from "../middlewares/auth.middleware.js";
@@ -16,6 +15,6 @@ router.get("/:id", getUserById);
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/edit", AuthenticateUser, editUser);
-router.get("/profile", AuthenticateUser, getProfile);
+router.get("/profile", AuthenticateUser, getUserById);
 
 export default router;
