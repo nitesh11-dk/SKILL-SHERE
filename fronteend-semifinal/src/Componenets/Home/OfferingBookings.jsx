@@ -39,7 +39,7 @@ const BookingCard = ({ booking, onStatusChange }) => {
               className="flex-1 bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 
                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="pending">Pending</option>
+              <option value="pending" >Select</option>
               <option value="accept">Accept</option>
               <option value="reject">Reject</option>
             </select>
