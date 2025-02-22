@@ -58,7 +58,6 @@ const UserDetails = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [isEditingSkills, setIsEditingSkills] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-console.log(id);
   const fetchUser = async () => {
     try {
       setIsLoading(true);
