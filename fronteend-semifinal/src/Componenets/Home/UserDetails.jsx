@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import AppContext from "../../context/AppContext";
 import Booking from "./Booking";
 import SkillsTemplate from '../SkillsTemplate';
+import ReviewForm from './ReviewForm';
 
 const SkillsCard = ({ skills, onEditClick, isEditing, onSkillsUpdate }) => {
 
@@ -54,23 +55,21 @@ const UserDetails = () => {
   const { getUserById } = useContext(AppContext);
   const [user, setUser] = useState(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const [isEditingSkills, setIsEditingSkills] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
+console.log(id);
   const fetchUser = async () => {
-    setIsLoading(true);
     try {
-      const response = await getUserById(id);
-      if (response?.success) {
-        setUser(response.data);
-      }
+      setIsLoading(true);
+      const userData = await getUserById(id);
+      setUser(userData.data);
     } catch (error) {
       console.error('Error fetching user:', error);
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     fetchUser();
   }, [id]);
@@ -154,7 +153,14 @@ const UserDetails = () => {
         {/* Reviews Section */}
         <div className="col-span-2">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-white text-xl font-bold">Reviews</h3>
+            <h3 className="text-white text-xl font-bold">Reviews ({user.reviews.length})</h3>
+            <button
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 
+                rounded-md text-sm transition-colors duration-200"
+              onClick={() => setShowReviewForm(true)}
+            >
+              Add Review
+            </button>
           </div>
 
           <div className="space-y-4">
@@ -186,6 +192,14 @@ const UserDetails = () => {
           user_skills={user.skills}
           provider={id}
           onClose={() => setShowBookingForm(false)}
+        />
+      )}
+
+      {showReviewForm && (
+        <ReviewForm
+          userId={id}
+          onClose={() => setShowReviewForm(false)}
+          onReviewAdded={fetchUser}
         />
       )}
     </div>
