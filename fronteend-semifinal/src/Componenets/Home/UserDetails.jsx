@@ -1,101 +1,79 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import AppContext from "../../context/AppContext";
 import Booking from "./Booking";
+import SkillsTemplate from '../SkillsTemplate';
 
-const ReviewForm = ({ onSubmit, onClose }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting }
-  } = useForm({
-    defaultValues: {
-      rating: "",
-      comment: ""
-    }
-  });
+const SkillsCard = ({ skills, onEditClick, isEditing, onSkillsUpdate }) => {
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <form 
-        className="bg-gray-700 p-6 rounded-md w-96"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <h4 className="text-white text-xl font-bold mb-4">Add Review</h4>
-        <div className="space-y-4">
-          <div>
-            <input
-              {...register("rating", {
-                required: "Rating is required",
-                min: { value: 1, message: "Rating must be at least 1" },
-                max: { value: 5, message: "Rating must not exceed 5" }
-              })}
-              type="number"
-              placeholder="Rating (1-5)"
-              className="w-full p-2 rounded-md bg-gray-600 text-white"
-            />
-            {errors.rating && (
-              <p className="mt-1 text-sm text-red-500">{errors.rating.message}</p>
-            )}
-          </div>
+    <div className="relative bg-gray-700 p-4 rounded-md">
+      {isEditing && (
+        <div className="absolute -top-4 right-0">
+        <SkillsTemplate 
+        initialSkills={skills}
+        isEditMode={true}
+        onSuccess={onSkillsUpdate}
+        onCancel={() => onEditClick(false)}
+      />
+      </div>
+      )
+}
 
-          <div>
-            <textarea
-              {...register("comment", {
-                required: "Comment is required",
-                minLength: { value: 10, message: "Comment must be at least 10 characters" }
-              })}
-              placeholder="Comment"
-              className="w-full p-2 rounded-md bg-gray-600 text-white h-20"
-            />
-            {errors.comment && (
-              <p className="mt-1 text-sm text-red-500">{errors.comment.message}</p>
-            )}
-          </div>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-white text-xl font-bold">Skills</h3>
+        <button
+          onClick={() => onEditClick(true)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 
+            rounded-md text-sm transition-colors duration-200"
+        >
+          Edit Skills
+        </button>
+      </div>
 
-          <div className="flex justify-end gap-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 
-                transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      {skills.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {skills.map((skill) => (
+            <span
+              key={skill._id}
+              className="bg-zinc-600 px-3 py-1 rounded-md text-yellow-400"
             >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 
-                transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
-          </div>
+              {skill.title}
+            </span>
+          ))}
         </div>
-      </form>
+      ) : (
+        <p className="text-gray-400">No skills available.</p>
+      )}
     </div>
   );
 };
 
 const UserDetails = () => {
   const { id } = useParams();
-  const { getUserById, addReview } = useContext(AppContext);
+  const { getUserById } = useContext(AppContext);
   const [user, setUser] = useState(null);
-  const [showReviewForm, setShowReviewForm] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchUser = async () => {
-    const response = await getUserById(id);
-    if (response?.success) {
-      setUser(response.data);
+    setIsLoading(true);
+    try {
+      const response = await getUserById(id);
+      if (response?.success) {
+        setUser(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [id]);
 
   const renderRating = (rating) => {
     const fullStars = Math.floor(rating);
@@ -110,18 +88,23 @@ const UserDetails = () => {
     );
   };
 
-  const handleAddReview = async (data) => {
-    const response = await addReview({ ...data, userId: id });
-    if (response?.success) {
-      setShowReviewForm(false);
-      fetchUser();
-    }
+  const handleSkillsUpdate = async () => {
+    setIsEditingSkills(false);
+    await fetchUser();
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-800">
+        <p className="text-gray-400 text-xl">Loading user details...</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-800">
-        <p className="text-gray-400 text-xl">Loading user details...</p>
+        <p className="text-gray-400 text-xl">User not found</p>
       </div>
     );
   }
@@ -156,22 +139,12 @@ const UserDetails = () => {
 
         {/* Skills and Rating Card */}
         <div className="bg-gray-700 p-4 rounded-md">
-          <h3 className="text-white text-xl font-bold mb-4">Skills</h3>
-          {user.skills.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {user.skills.map((skill) => (
-                <span
-                  key={skill._id}
-                  className="bg-zinc-600 px-3 py-1 rounded-md text-yellow-400"
-                >
-                  {skill.title}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-400">No skills available.</p>
-          )}
-
+          <SkillsCard
+            skills={user.skills}
+            onEditClick={setIsEditingSkills}
+            isEditing={isEditingSkills}
+            onSkillsUpdate={handleSkillsUpdate}
+          />
           <h3 className="text-white text-xl font-bold mt-6 mb-2">Overall Rating</h3>
           <div className="text-yellow-400 text-xl">
             {renderRating(averageRating)}
@@ -182,13 +155,6 @@ const UserDetails = () => {
         <div className="col-span-2">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-white text-xl font-bold">Reviews</h3>
-            <button
-              className="bg-green-500 text-white px-4 py-2 rounded-md 
-                hover:bg-green-600 transition-colors duration-200"
-              onClick={() => setShowReviewForm(true)}
-            >
-              Add Review
-            </button>
           </div>
 
           <div className="space-y-4">
@@ -214,13 +180,6 @@ const UserDetails = () => {
           </div>
         </div>
       </div>
-
-      {showReviewForm && (
-        <ReviewForm
-          onSubmit={handleAddReview}
-          onClose={() => setShowReviewForm(false)}
-        />
-      )}
 
       {showBookingForm && (
         <Booking

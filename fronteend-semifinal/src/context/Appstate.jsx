@@ -92,6 +92,17 @@ const Appstate = (props) => {
     });
   };
 
+  const handleRemoveSkills = async (formData) => {
+    return await apiCall({
+      method: 'post',
+      endpoint: '/skills/remove',
+      data: formData,
+      requiresAuth: true,
+      successMessage: 'Skills removed successfully'
+    });
+  };
+
+
   const getAllUsers = async () => {
     const response = await apiCall({
       endpoint: '/user/',
@@ -197,6 +208,7 @@ const Appstate = (props) => {
         user,
         // userProfile,
         handleAddSkills,
+        handleRemoveSkills,
         getAllUsers,
         getUserById,
         addReview,
