@@ -1,17 +1,15 @@
 import { Router } from "express";
 import {
   addSkill,
-  updateSkill,
-  deleteSkill,
-  getAllSkills
+  removeSkill
 } from "../controllers/skills.controller.js";
 import { AuthenticateUser } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 router.post("/add",AuthenticateUser, addSkill);
-router.put("/edit/:id",AuthenticateUser, updateSkill);
-router.delete("/delete/:id",AuthenticateUser, deleteSkill);
-router.get("/all",AuthenticateUser, getAllSkills);
+router.delete("/delete/:id",AuthenticateUser, removeSkill);
+// router.put("/edit/:id",AuthenticateUser, updateSkill);
+// router.get("/all",AuthenticateUser, getAllSkills);
 
 
 

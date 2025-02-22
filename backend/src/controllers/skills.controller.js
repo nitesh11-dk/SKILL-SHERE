@@ -3,109 +3,106 @@ import User from "../models/user.model.js";
 
 export async function addSkill(req, res) {
   try {
-    const userId = req.user._id; // Get the authenticated user's ID
-    const { title, category } = req.body;
+    const userId = req.user._id;
+    const skills = req.body.skills; // Array of {title, category} objects
 
-    const newSkill = new Skill({
-      title,
-      category,
-      user: userId,
-    });
+    if (!Array.isArray(skills)) {
+      return res.status(400).json({
+        success: false,
+        message: "Skills must be provided as an array"
+      });
+    }
 
-    const skill = await newSkill.save();
+    const addedSkills = [];
 
-    // Add the skill ID to the user's skills array
-    await User.findByIdAndUpdate(userId, { $push: { skills: skill._id } });
+    for (const skillData of skills) {
+      const { title, category } = skillData;
+
+      // Check if skill already exists (case insensitive)
+      const existingSkill = await Skill.findOne({
+        title: { $regex: new RegExp(`^${title}$`, 'i') },
+        category: { $regex: new RegExp(`^${category}$`, 'i') }
+      });
+
+      let skill;
+      if (existingSkill) {
+        skill = existingSkill;
+      } else {
+        // Create new skill if it doesn't exist
+        const newSkill = new Skill({
+          title,
+          category
+        });
+        skill = await newSkill.save();
+      }
+
+      // Check if user already has this skill
+      const userHasSkill = await User.findOne({
+        _id: userId,
+        skills: skill._id
+      });
+
+      if (!userHasSkill) {
+        // Add the skill ID to the user's skills array only if not already present
+        await User.findByIdAndUpdate(userId, { $push: { skills: skill._id } });
+      }
+
+      addedSkills.push(skill);
+    }
 
     res.status(201).json({
       success: true,
       message: "Skills added successfully",
-      data: skill,
+      data: addedSkills,
     });
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: "Error adding skill",
+      message: "Error adding skills",
       error: error.message,
     });
   }
 }
 
-export async function updateSkill(req, res) {
-  try {
-    const userId = req.user._id; // Get the authenticated user's ID
-    const { title, category, experience } = req.body;
 
-    const skill = await Skill.findOneAndUpdate(
-      { user: userId, _id: req.params.id },
-      { title, category, experience },
-      { new: true, runValidators: true }
+export async function removeSkill(req, res) {
+  try {
+    const userId = req.user._id;
+    const skillsToRemove = req.body.skills; // Array of skill IDs to remove
+
+    if (!Array.isArray(skillsToRemove)) {
+      return res.status(400).json({
+        success: false,
+        message: "Skills must be provided as an array"
+      });
+    }
+
+    // Get user with their skills array
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Filter out all skills that need to be removed
+    const updatedSkills = user.skills.filter(
+      (skillId) => !skillsToRemove.includes(skillId.toString())
     );
 
-    if (!skill) {
-      return res.status(404).json({
-        success: false,
-        message: "Skill not found for this user",
-      });
-    }
+    // Update user with new skills array
+    user.skills = updatedSkills;
+    await user.save();
 
     res.status(200).json({
       success: true,
-      message: "Skill updated successfully",
-      data: skill,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: "Error updating skill",
-      error: error.message,
-    });
-  }
-}
-
-export async function deleteSkill(req, res) {
-  try {
-    const userId = req.user._id; // Get the authenticated user's ID
-    const skill = await Skill.findOneAndDelete({ user: userId, _id: req.params.id });
-
-    if (!skill) {
-      return res.status(404).json({
-        success: false,
-        message: "Skill not found to delete",
-      });
-    }
-
-    // Remove the skill ID from the user's skills array
-    await User.findByIdAndUpdate(userId, { $pull: { skills: skill._id } });
-
-    res.status(201).json({
-      success: true,
-      message: "Skill deleted successfully",
+      message: "Skills removed from user successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error deleting skill",
-      error: error.message,
-    });
-  }
-}
-
-export async function getAllSkills(req, res) {
-  try {
-    const userId = req.user._id; // Get the authenticated user's ID
-    const skills = await Skill.find({ user: userId }).populate("user", "name email");
-
-    res.status(200).json({
-      success: true,
-      count: skills.length,
-      data: skills,
-      message: "Skills retrieved successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error retrieving skills",
+      message: "Error removing skills from user",
       error: error.message,
     });
   }
