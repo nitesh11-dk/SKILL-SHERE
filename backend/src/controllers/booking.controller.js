@@ -1,34 +1,67 @@
 import Booking from "../models/booking.model.js";
 import User from "../models/user.model.js";
+
 export const createBooking = async (req, res) => {
-    try {
-        const { type, provider, skillsToLearn, date, isBarterExchange, barterSkill } = req.body;
 
-        if (!type || !provider || !skillsToLearn || skillsToLearn.length === 0) {
-            return res.status(400).json({ error: "Missing required fields or skillsToLearn must have at least one option" });
-        }
+  try {
+      const { type, provider, skillsToLearn, availabilityDate, availabilityTime, inAvailabilityTime, isBarterExchange, barterSkill } = req.body;
 
-        const booking = new Booking({
-            type,
-            provider,
-            requester: req.user._id,
-            skillsToLearn,
-            date,
-            isBarterExchange,
-            barterSkill
+      if (!type || !provider || !skillsToLearn || !availabilityDate || !inAvailabilityTime || !availabilityTime) {
+          return res.status(400).json({ message: "Missing required fields." });
+      }
+
+      // Check if provider and requester are same
+      if (provider.toString() === req.user._id.toString()) {
+          return res.status(400).json({ 
+              success: false, 
+              message: "Provider and requester cannot be the same person."
+          });
+      }
+
+      const currentDate = new Date();
+      const selectedDate = new Date(availabilityDate);
+  
+      // Ensure the availability date is in the future
+      if (selectedDate <= currentDate) {
+        return res.status(400).json({ success: false, message: "Availability date must be in the future." });
+      }
+
+      // Validate availabilityTime
+      const validTimeSlots = ["morning", "afternoon", "evening", "night"];
+      if (!validTimeSlots.includes(availabilityTime)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid time slot. Must be morning(8-11), afternoon(12-4), evening(4-7) or night(8-11)"
         });
+      }
 
-        await booking.save();
+      const userSkills = await User.findById(req.user._id).populate('skills');
+      const skillTitles = userSkills.skills.map(skill => skill.title);
 
-        // Add booking ID to the user's bookings
-        await User.findByIdAndUpdate(req.user._id, { $push: { bookings: booking._id } });
+      const booking = new Booking({
+          type,
+          provider,
+          requester: req.user._id,
+          skillsToLearn,
+          availabilityDate: new Date(availabilityDate),
+          availabilityTime,
+          isBarterExchange,
+          inAvailabilityTime,
+          barterSkillOptions: skillTitles,
+          barterSkill
+      });
 
-        const populatedBooking = await booking.populate("skillsToLearn barterSkill");
-        res.status(201).json({ message: "Booking created successfully", success: true, data: populatedBooking });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "An error occurred while creating the booking", error: err.message });
-    }
+      await booking.save();
+      await User.findByIdAndUpdate(req.user._id, { $push: { bookings: booking._id } });
+      const populatedBooking = await booking.populate("provider requester");
+
+      res.status(201).json({ message: "Booking created successfully", success: true, data: populatedBooking });
+  } catch (err) {
+      res.status(500).json({ success: false, message: "An error occurred while creating the booking", error: err.message });
+  }
 };
+
+
 
 export const getOfferingBookings = async (req, res) => {
     try {
@@ -62,10 +95,10 @@ export const getRequesterBookings = async (req, res) => {
 
 export const respondToBooking = async (req, res) => {
     try {
-      const { bookingId, action } = req.body;
+      const { bookingId, action,barterSkill} = req.body;
       const userId = req.user._id;
   
-      if (!bookingId || !action) {
+      if (!bookingId || !action || !barterSkill) {
         return res.status(400).json({ error: "Missing required fields" });
       }
   
@@ -85,6 +118,7 @@ export const respondToBooking = async (req, res) => {
         return res.status(200).json({ success: true, message: "Booking rejected successfully" });
       } else if (action == 'accept') {
         booking.status = 'accepted';
+        booking.barterSkill =barterSkill;
         await booking.save();
         return res.status(200).json({ success: true, message: "Booking accepted successfully" });
       } else {

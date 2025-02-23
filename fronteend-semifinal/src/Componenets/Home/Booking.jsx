@@ -3,8 +3,15 @@ import { useForm, Controller } from "react-hook-form";
 import AppContext from "../../context/AppContext";
 
 const Booking = ({ user_skills, provider, onClose }) => {
-  const { creatBooking } = useContext(AppContext);
+  const { creatBooking} = useContext(AppContext);
   const skills = user_skills.map((s) => s.title);
+
+  const timeSlots = {
+    morning: "8:00-11:00",
+    afternoon: "12:00-16:00",
+    evening: "16:00-19:00", 
+    night: "20:00-23:00"
+  };
 
   const {
     control,
@@ -14,13 +21,17 @@ const Booking = ({ user_skills, provider, onClose }) => {
     defaultValues: {
       provider,
       type: "requesting",
-      skillsToLearn: [],
-      isBarterExchange: true,
-      barterSkill: [],
+      skillsToLearn: "",
+      availabilityDate: "",
+      availabilityTime: "",
+      isBarterExchange: false,
+      inAvailabilityTime: true,
+      barterSkill: ""
     }
   });
 
   const onSubmit = async (data) => {
+    console.log(data)
     const response = await creatBooking(data);
     if (response?.success) {
       onClose();
@@ -42,56 +53,79 @@ const Booking = ({ user_skills, provider, onClose }) => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label className="block text-gray-300 text-lg mb-2">Type:</label>
-            <p className="block w-full text-lg p-2 bg-gray-700 text-white rounded-md">
-              Requesting
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-gray-300 text-lg mb-2">
-              Skills to Learn:
-            </label>
+            <label className="block text-gray-300 text-lg mb-2">Skill to Learn:</label>
             <Controller
               name="skillsToLearn"
               control={control}
-              rules={{ 
-                required: "Please select at least one skill",
-                validate: value => value.length > 0 || "At least one skill is required"
-              }}
-              render={({ field: { onChange, value } }) => (
-                <div className="space-y-2">
+              rules={{ required: "Please select a skill" }}
+              render={({ field }) => (
+                <select
+                  {...field}
+                  className="block w-full text-lg p-2 bg-gray-700 text-white rounded-md"
+                >
+                  <option value="">Select a skill</option>
                   {skills.map((skill) => (
-                    <label key={skill} className="flex items-center text-lg text-white">
-                      <input
-                        type="checkbox"
-                        checked={value.includes(skill)}
-                        onChange={(e) => {
-                          const newValue = e.target.checked
-                            ? [...value, skill]
-                            : value.filter(s => s !== skill);
-                          onChange(newValue);
-                        }}
-                        className="mr-3 h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-                      />
+                    <option key={skill} value={skill}>
                       {skill}
-                    </label>
+                    </option>
                   ))}
-                </div>
+                </select>
               )}
             />
             {errors.skillsToLearn && (
-              <p className="mt-2 text-sm text-red-500">
-                {errors.skillsToLearn.message}
-              </p>
+              <p className="mt-2 text-sm text-red-500">{errors.skillsToLearn.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-gray-300 text-lg mb-2">Availability Date:</label>
+            <Controller
+              name="availabilityDate"
+              control={control}
+              rules={{ required: "Availability date is required" }}
+              render={({ field }) => (
+                <input
+                  type="date"
+                  {...field}
+                  min={new Date().toISOString().split("T")[0]} // Prevents past dates
+                  className="block w-full text-lg p-2 bg-gray-700 text-white rounded-md"
+                />
+              )}
+            />
+            {errors.availabilityDate && (
+              <p className="mt-2 text-sm text-red-500">{errors.availabilityDate.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-gray-300 text-lg mb-2">Time Slot:</label>
+            <Controller
+              name="availabilityTime"
+              control={control}
+              rules={{ required: "Time slot is required" }}
+              render={({ field }) => (
+                <select
+                  {...field}
+                  className="block w-full text-lg p-2 bg-gray-700 text-white rounded-md"
+                >
+                  <option value="">Select a time slot</option>
+                  {Object.entries(timeSlots).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {key.charAt(0).toUpperCase() + key.slice(1)} ({value})
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
+            {errors.availabilityTime && (
+              <p className="mt-2 text-sm text-red-500">{errors.availabilityTime.message}</p>
             )}
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg py-2 px-4 rounded-md
-              transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg py-2 px-4 rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Creating..." : "Create Booking"}
           </button>
