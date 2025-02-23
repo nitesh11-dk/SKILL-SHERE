@@ -1,56 +1,52 @@
-import React, { createContext, useContext, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { createContext, useEffect, useContext, useState } from 'react';
+import { apiCall } from '../utils/utils';
 
 const TaskContext = createContext();
 
-const initialTasks = [
-  {
-    id: uuidv4(),
-    title: 'Team Meeting-45',
-    description: 'Weekly sync with the development team',
-    date: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
-    time: '11:00',
-    bgColor: 'bg-green-500'
-  },
-  {
-    id: uuidv4(),
-    title: 'Team Meeting',
-    description: 'Weekly sync with the development team',
-    date: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
-    time: '11:00',
-    bgColor: 'bg-blue-500'
-  },
-  {
-    id: uuidv4(),
-    title: 'Project Review',
-    description: 'Review Q1 project milestones',
-    date: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(),
-    time: '14:00',
-    bgColor: 'bg-purple-500'
-  },
-  {
-    id: uuidv4(),
-    title: 'Client Call',
-    description: 'Product demo with client',
-    date: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
-    time: '11:00',
-    bgColor: 'bg-green-500'
-  },
-  {
-    id: uuidv4(),
-    title: 'Planning Session',
-    description: 'Sprint planning for next week',
-    date: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
-    time: '09:00',
-    bgColor: 'bg-yellow-500'
-  }
+const getAllTask = async () => {
+  const response = await apiCall({
+    method: 'get',
+    endpoint: '/task/all',
+    requiresAuth: true,
+    successMessage: 'Tasks retrieved successfully'
+  });
+  return response.data;
+};
+
+// Random background colors for tasks
+const backgroundColors = [
+  'bg-green-500', 'bg-blue-500', 'bg-purple-500',
+  'bg-yellow-500', 'bg-red-500', 'bg-pink-500'
 ];
 
+const getRandomBgColor = () => {
+  return backgroundColors[Math.floor(Math.random() * backgroundColors.length)];
+};
+
 export const TaskProvider = ({ children }) => {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        let res = await getAllTask();
+        if (res?.success) {
+          const formattedTasks = res.data.map(task => ({
+            ...task,
+            id: task._id, // Use MongoDB _id as id
+            bgColor: getRandomBgColor() // Assign random background color
+          }));
+          setTasks(formattedTasks);
+        }
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    }
+    fetchData();
+  }, []);
 
   const addTask = (newTask) => {
-    setTasks([...tasks, { ...newTask, id: uuidv4() }]);
+    setTasks([...tasks, { ...newTask, id: newTask._id, bgColor: getRandomBgColor() }]);
   };
 
   const updateTask = (taskId, updatedTask) => {

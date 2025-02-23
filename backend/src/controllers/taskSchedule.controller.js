@@ -60,6 +60,53 @@ export const createTaskSchedule = async (req, res) => {
   }
 };
 
+
+
+
+
+
+// Get all bookings by specific user
+export const getUserTasks = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const bookings = await BookingModel.find({ 
+      $or: [{ provider: userId }, { requester: userId }] 
+    }).populate('taskSchedule');
+
+    if (!bookings.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No bookings found for this user"
+      });
+    }
+    const taskSchedules = bookings.map(booking => booking.taskSchedule);
+    return res.status(200).json({
+      success: true,
+      message: "User task schedules retrieved successfully",
+      data: taskSchedules
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving user bookings",
+      error: err.message
+    });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Get all task schedules
 export const getAllTaskSchedules = async (req, res) => {
   try {

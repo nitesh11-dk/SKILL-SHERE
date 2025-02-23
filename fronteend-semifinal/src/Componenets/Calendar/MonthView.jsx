@@ -12,16 +12,15 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
     const month = date.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const days = [];
+    const days = new Array(firstDayOfMonth).fill(null); // Ensure proper alignment
 
-    // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(null);
-    }
-
-    // Add days of the month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
+    }
+
+    // Ensure full rows in the grid (optional for UI consistency)
+    while (days.length % 7 !== 0) {
+      days.push(null);
     }
 
     return days;
@@ -39,8 +38,10 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
   };
 
   const formatTime = (time) => {
+    if (!time) return "No time";
+    
     const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
+    const hour = parseInt(hours, 10);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const hour12 = hour % 12 || 12;
     return `${hour12}:${minutes} ${ampm}`;
@@ -49,7 +50,6 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
   const handleDateClick = (day, e) => {
     if (!day) return;
     
-    // Create a new date at 10 AM on the clicked day
     const selectedDate = new Date(day);
     selectedDate.setHours(10, 0, 0, 0);
     
@@ -59,7 +59,6 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
   const handleTaskHover = (e, task, isEnter) => {
     e.stopPropagation();
     
-    // Clear any existing timeout
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
@@ -68,21 +67,18 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
     if (isEnter) {
       const taskElement = e.currentTarget;
       const rect = taskElement.getBoundingClientRect();
-      const tooltipWidth = 192; // w-48 = 12rem = 192px
+      const tooltipWidth = 192;
       
-      // Position the tooltip relative to the task element
       let left = rect.left;
-      let top = rect.bottom + 4; // 4px gap
+      let top = rect.bottom + 4;
       
-      // Check if tooltip would go off the right edge of the screen
       if (left + tooltipWidth > window.innerWidth) {
-        left = window.innerWidth - tooltipWidth - 16; // 16px padding
+        left = window.innerWidth - tooltipWidth - 16;
       }
       
-      // Check if tooltip would go off the bottom of the screen
-      const tooltipHeight = 150; // Approximate height of tooltip
+      const tooltipHeight = 150;
       if (top + tooltipHeight > window.innerHeight) {
-        top = rect.top - tooltipHeight - 4; // Position above the task
+        top = rect.top - tooltipHeight - 4;
       }
       
       taskElement.style.zIndex = '50';
@@ -91,7 +87,6 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
         position: { left, top }
       });
     } else {
-      // Add a small delay before hiding the tooltip
       hoverTimeoutRef.current = setTimeout(() => {
         e.currentTarget.style.zIndex = '';
         setHoveredTask(null);
@@ -106,7 +101,6 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
     }
     
     if (!isEnter) {
-      // Only hide after a delay when leaving the tooltip
       hoverTimeoutRef.current = setTimeout(() => {
         setHoveredTask(null);
       }, 50);
@@ -172,7 +166,7 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
                       onMouseLeave={(e) => handleTaskHover(e, task, false)}
                     >
                       <div className="truncate">
-                        {formatTime(task.time)} {task.title}
+                        {task.time ? formatTime(task.time) : "No time"} {task.title}
                       </div>
                     </div>
                   ))}
@@ -183,7 +177,6 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
         ))}
       </div>
 
-      {/* Tooltip Portal */}
       {hoveredTask && (
         <div 
           className="fixed bg-gray-800 text-white p-2 rounded shadow-lg z-[100] w-48"
@@ -202,31 +195,26 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
               <>
                 <div className="font-medium mb-1">{task.title}</div>
                 <div className="text-gray-300 text-xs mb-2">{task.description}</div>
-                <div className="text-gray-300 text-xs">{formatTime(task.time)}</div>
+                <div className="text-gray-300 text-xs">{task.time ? formatTime(task.time) : "No time"}</div>
                 <div className="flex justify-end space-x-2 mt-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onTaskClick(task, e);
                     }}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors duration-150"
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm('Are you sure you want to delete this task?')) {
-                        deleteTask(task.id);
-                      }
-                    }}
-                    className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-colors duration-150"
+                    onClick={() => deleteTask(task.id)}
+                    className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs"
                   >
                     Delete
                   </button>
                 </div>
               </>
-            ) : null
+            ) : null;
           })()}
         </div>
       )}
@@ -234,4 +222,4 @@ const MonthView = ({ onDateClick, onTaskClick }) => {
   );
 };
 
-export default MonthView; 
+export default MonthView;
