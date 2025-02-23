@@ -75,7 +75,13 @@
       inAvailabilityTime: {
         type: Boolean, // Array of unavailable time slots in "HH:mm"
         default:true
-      }
+      },
+      taskSchedule: 
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "TaskSchedule",
+          default: null,
+        },
     },
     {
       timestamps: true,

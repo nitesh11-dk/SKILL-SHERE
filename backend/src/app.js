@@ -7,6 +7,8 @@ import user from "./routes/user.route.js";
 import skills from "./routes/skills.route.js";
 import booking from "./routes/booking.route.js";
 import review from "./routes/review.route.js";
+import tasks from "./routes/taskSchedule.route.js";
+
 dotenv.config();
 connectDb();
 
@@ -31,6 +33,7 @@ app.use("/api/user", user);
 app.use("/api/skills", skills);
 app.use("/api/bookings", booking);
 app.use("/api/review", review);
+app.use("/api/task", tasks);
 
 app.listen(PORT, () => {
   console.log(`Server running on port http://localhost:${PORT}`);

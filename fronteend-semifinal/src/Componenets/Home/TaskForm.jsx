@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import { useForm } from 'react-hook-form';
 import { FaTimes } from "react-icons/fa";
+import AppContext from "../../context/AppContext";
 
 const TaskForm = ({ booking, onClose }) => {
+const { createTask } = useContext(AppContext);
   const timeSlots = {
     morning: "8:00-11:00",
     afternoon: "12:00-16:00",
@@ -33,6 +35,7 @@ const TaskForm = ({ booking, onClose }) => {
   useEffect(() => {
     if (isAvailable) {
       setValue('date', booking.availabilityDate);
+      setValue('title',`${booking.skillsToLearn} - ${booking.barterSkill}`)
       if (booking.availabilityTime) {
         const [start] = timeSlots[booking.availabilityTime].split('-');
         setValue('startTime', start);
@@ -48,6 +51,11 @@ const TaskForm = ({ booking, onClose }) => {
   }, [isAvailable]);
 
   const onSubmit = (data) => {
+    data.booking_id = booking._id;
+    let res = createTask(data);
+    if(res){
+      onClose();
+    }
     console.log('Form submitted:', data);
   };
 
@@ -114,7 +122,8 @@ const TaskForm = ({ booking, onClose }) => {
             <input
               {...register("title", { 
                 required: "Title is required",
-                minLength: { value: 3, message: "Title must be at least 3 characters" }
+                minLength: { value: 3, message: "Title must be at least 3 characters" },
+                value: `${booking.skillsToLearn} - ${booking.skillsToExchange}`
               })}
               className="w-full bg-gray-600 text-white p-2 rounded"
             />

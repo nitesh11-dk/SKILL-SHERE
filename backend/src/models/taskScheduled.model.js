@@ -23,7 +23,6 @@ const taskScheduleSchema = new mongoose.Schema({
   },
   meetingId: {
     type: String,
-    required: true
   }
 });
 

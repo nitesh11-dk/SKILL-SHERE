@@ -160,6 +160,18 @@ const Appstate = (props) => {
     return response.data;
   };
 
+  
+  const createTask = async (formData) => {
+    const response = await apiCall({
+      method: 'post',
+      endpoint: '/task/create',
+      data: formData,
+      requiresAuth: true,
+      successMessage: 'Schedule created successfully'
+    });
+    return response.data;
+  };
+
   // const scheduleBookingDate = async (formData) => {
   //   try {
   //     if (localStorage.getItem("token")) {
@@ -208,6 +220,7 @@ const Appstate = (props) => {
         offeringBookings,
         logoutUser,
         setBookingStatus,
+        createTask
         // scheduleBookingDate,
       }}
     >
